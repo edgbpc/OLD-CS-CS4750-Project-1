@@ -11,7 +11,7 @@ if (argc != 2) {
 	return 1;
 }
 
-n = atoi(argv[1];
+n = atoi(argv[1]);
 for (i = 1; i < n; i++)
 	if ((childpid = fork()) <= 0 )
 		break;
