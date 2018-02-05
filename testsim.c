@@ -14,8 +14,6 @@ for (index = 0; index <= repeatFactor; index++){
 	fprintf (stderr, "Process ID is %d\n", getpid());
 }
 
-return 0;
-
 }
 
 
