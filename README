@@ -1,0 +1,12 @@
+
+run make all to create executables proc_fan and testsim
+
+To run program command is ./proc_fan -n [Int] < [Filename].  Example proc_fan -n 5 < testing.data
+
+concerning perror.  My perror does display executable name however I had a hard time finding opportunties to force a perror to test.  the only opportunity i can force it is when entering incorrect number of parameters.  This however doesn't have a standard errno associated so it appends Success. In this case, i just went with a fprintf error message.
+
+I use perror after makeargv and after creating a child but i could not test to use when a error occurs to see if perror appended the proper message for that functions particular error message.
+
+My testing.data has the same values from the assignment in the book. It takes quite a while to run but does terminate.
+
+
