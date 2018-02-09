@@ -28,5 +28,5 @@ testsim: $(OBJS2)
 
 .PHONY: clean
 clean:
-	/bin/rm -f *.o *~ $(TARGET)
+	/bin/rm -f *.o *~ $(TARGET1) $(TARGET2)
 
