@@ -4,30 +4,30 @@
 #include <sys/wait.h>
 
 #ifndef MAX_CANON
-#define MAX_CANON 14
+#define MAX_CANON 15
 #endif
 
 void print_usage () {
-	printf("Usage: proc_fan -n/-h\n-n to specify number of processes to spawn.\n  -h display this usage information\n");
+	printf("Format: proc_fan Option Integar < Filename \n Options:  \n -n to specify max number processes that can be ran at once\n\t Example: proc_fan -n 5 \n -h display this usage information\n");
 }
 
 
 int main (int argc, char *argv[]) {
-	FILE *fp;
+//	FILE *fp;
 
 	pid_t childpid = 0;
 	pid_t endID;
 	int status;	
 
 	int i;
-
-	int pr_limit= -1;
-	int pr_count;
-
+	int pr_limit;
+	int pr_count = 0; //holds number of active children
 	int option = 0;
-
-	fp = fopen(argv[3], "r");
+//	fp = fopen(argv[3], "r");
 	char str[13];
+	int numtokens;
+	char delimiters[] = " ";
+	char **myargv;
 	
 while ((option = getopt(argc, argv, "n:h")) != -1){
 	switch (option){
@@ -41,52 +41,57 @@ while ((option = getopt(argc, argv, "n:h")) != -1){
 		exit(EXIT_FAILURE);
 	}
 }
-
-if(fp == NULL) {
-	perror("Error openning file");
-	return (-1);
-}
-
-
-//if (argc != 2) {
-//	fprintf (stderr, "Usage: %s, processes\n", argv[0]);
-//	return 1;
+//checks if file openned without error
+//if(fp == NULL) {
+//	perror("Proc_fan: Error: File Did Not Open.  Terminating program.");
+//	return (-1);
 //}
 
-//numOfChildProcesses = atoi(argv[1]);
-if (pr_limit ==  -1) {
-	print_usage();
-	exit(EXIT_FAILURE);
+if (argc != 3){
+	perror("Error: Incorrect parameters passed. proc_fan -h for help");
+	exit(0);	
 }
 
-while (fgets(str, MAX_CANON, fp) != NULL) {
-	
+
+
+//in a main loap, continue until end of file reached
+
+while (fgets(str, MAX_CANON, stdin) != NULL) { //fgets takes a line from testing.data.  loop stops when NULL is returned
+
+	// if pr_count is pr_limit, wait for children to finish and decrement pr_count
 	if (pr_count == pr_limit) {
 		childpid = wait(NULL);
 		pr_count--;
-	} else { 
-		childpid = fork();
-		system(str);
-		pr_count++;
-		}
+	} 
+		//read  line from standard input and execute program corresponding to the command like by forking a child
+	childpid = fork();
+	pr_count++;
 
-	do {
+
+        if (childpid == 0) {
+			if ((numtokens = makeargv(str, delimiters, &myargv)) == -1) {
+				fprintf(stderr, "Failed to construct an arguement array for %s\n", str);
+		
+			} else {
+				execvp(myargv[0], &myargv[0]);
+			}
+	//		return 1;
+         	
+	}
+ 
+
+
+	do { //check to see if any of the children of finished.  decrement for each completed child
 		endID = waitpid(childpid, &status, WNOHANG);
 		if (endID != 0){
-			pr_count--;
+			pr_count =- 1;
 		}		
-	} while (!WIFEXITED(status) && !WIFSIGNALED(status));
-		
+	} while(!WIFEXITED(status) && !WIFSIGNALED(status));
 	
-}
-fclose(fp);
+};	
+		for (i = 0; i < pr_count; i++){
+			wait(NULL);
+		}	
 
-//for (i = 1; i < pr_limit; i++)
-//	if ((childpid = fork()) <= 0 ){
-//		system("./testsim 5 10");
-//		break;
-//}
-//fprintf(stderr, "i:%d process ID:%ld parent ID:%ld child ID: %ld\n",
-//	i, (long)getpid(), (long)getppid(), (long)childpid);
 return 0;
 }
