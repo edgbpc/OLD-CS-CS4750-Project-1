@@ -29,27 +29,27 @@ int main (int argc, char *argv[]) {
 	char delimiters[] = " ";
 	char **myargv;
 	
+//	fprintf(stderr, "%s: Error: ", argv[0]);
+
+	
 while ((option = getopt(argc, argv, "n:h")) != -1){
 	switch (option){
 		case 'n' : pr_limit = atoi(optarg);
 		break;
 
 		case 'h': print_usage();
-		return(0);		break;
+		return(0);	
+		break;
 
 		default : print_usage(); 
 		exit(EXIT_FAILURE);
 	}
 }
-//checks if file openned without error
-//if(fp == NULL) {
-//	perror("Proc_fan: Error: File Did Not Open.  Terminating program.");
-//	return (-1);
-//}
 
 if (argc != 3){
-	perror("Error: Incorrect parameters passed. proc_fan -h for help");
-	exit(0);	
+	//perror(("%s: Error: Insufficient parameters passed\n"));
+	printf("Insufficient parameters passed\n"); //i choose not to use perror here because it adds :Success to the end of the rror message
+	return 1;	
 }
 
 
@@ -64,18 +64,20 @@ while (fgets(str, MAX_CANON, stdin) != NULL) { //fgets takes a line from testing
 		pr_count--;
 	} 
 		//read  line from standard input and execute program corresponding to the command like by forking a child
-	childpid = fork();
+	if ((childpid = fork()) == -1){
+		perror(("%s: Error:", argv[0]));
+	}
 	pr_count++;
 
 
         if (childpid == 0) {
 			if ((numtokens = makeargv(str, delimiters, &myargv)) == -1) {
+				perror(("%s: Error:", argv[0]));	
 				fprintf(stderr, "Failed to construct an arguement array for %s\n", str);
 		
 			} else {
 				execvp(myargv[0], &myargv[0]);
 			}
-	//		return 1;
          	
 	}
  
