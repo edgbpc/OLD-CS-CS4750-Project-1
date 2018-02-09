@@ -9,11 +9,11 @@ int main (int argc, char *argv[]){
 	
 	int index;
 
-for (index = 0; index <= repeatFactor; index++){
+for (index = 0; index < repeatFactor; index++){
 	sleep(sleepTimer);
 	fprintf (stderr, "Process ID is %d\n", getpid());
 }
-
+return 1;
 }
 
 
